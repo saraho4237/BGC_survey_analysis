@@ -114,3 +114,7 @@ The median was imputed because the data in the questions with na's were skewed (
 ## Principal Components Analysis (PCA)
 
 ![](images/sn1.png)
+
+## Non_Negative Matrix Factorization
+
+![](images/recon_error.png)
