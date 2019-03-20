@@ -10,15 +10,15 @@ The Boys and Girls Club of Rosebud, South Dakota serves the youth of the Rosebud
 
 ![](images/badlands.png)
 
-In summer 2018, the Boys and Girls Club delivered a survey (via in person interview) to club members from the 3 different club sites (Mission, Rosebud, and Parmalee). The survey was designed to measure students' perception of their experience at the club. The results of the survey would be used to (a) determine how the club is progressing towards priority outcomes, and (b) adapt programming to continue working towards priority outcomes.
+In summer 2018, the Boys and Girls Club delivered a survey (via in person interview) to club members from the 3 different club sites (Mission, Rosebud, and Parmalee). The survey was designed to measure students' perception of their experience at the club. The results of the survey could be used to predict whether or not a student planned to continue coming to the club.
 
 ![](images/bike.png)
 
 ## Project Goals
 
-1) Determine which features (survey questions) are most predictive of a student's perception of the club experience.
+1) Determine which features (survey questions) are most predictive of whether a student plans to continue membership at the Boys and Girls Club. Use this information to shorten the survey in the future.
 
-2) Determine if we can mathematically pull out topics (cateogies of questions) from the features.
+2) Reduce the dimensionality of the data to get a model that best predicts whether or not a student plans to continue coming to the Boys and Girls Club.
 
 ## Data and EDA
 
@@ -54,7 +54,7 @@ Two separate surveys were administered. Student age 7 and younger were given a s
 | 26. The Club helps me to learn about Lakota language and culture                                                         | 5 Pt. Likert (SA,A,N,D,SD)                                        | ![](images/26.png)      |
 | 27. The Club helps me learn about myself, my family, and my tribe                                                        | 5 Pt. Likert (SA,A,N,D,SD)                                        | ![](images/27.png)      |
 | 28. I’m glad I’m a Boys and Girls Club member                                                                            | 5 Pt. Likert (SA,A,N,D,SD)                                        | ![](images/28.png)      |
-| 29. I want to continue to be a Boys and Girls Club member after this summer                                              | 5 Pt. Likert (SA,A,N,D,SD)                                        | ![](images/29.png)      |
+| **29. I want to continue to be a Boys and Girls Club member after this summer**                                              | 5 Pt. Likert (SA,A,N,D,SD)                                        | ![](images/29.png)      |
 | 30. I have fun and enjoy my time at the Boys and Girls Club                                                              | 5 Pt. Likert (SA,A,N,D,SD)                                        | ![](images/30.png)      |
 
 Survey responses were mapped to the following values:
@@ -80,6 +80,10 @@ Age appears to be bimodal (8- and 10-years-old).
 Most club members attend the Mission club. Mission, SD has a relatively large population for a reservation community (pop. 1,240) and has the largest elementary and middle school on the reservation.
 
 Most club members identify as American Indian.
+
+#### Demographics by target variable (planned retention)
+
+
 
 ### Missing Data
 
@@ -111,10 +115,82 @@ The median was imputed because the data in the questions with na's were skewed (
   * Good Character/ Citizenship: 81% of survey respondents agree or strongly agree that "going to the Club helps me develop my social skills with other students."
   * Healthy Lifestyles: 85% of survey respondents agree or strongly agree that "the Club helps me exercise more."
 
-## Principal Components Analysis (PCA)
+## Dimensionality Reduction
+
+### Principal Components Analysis (PCA) via Singular Value Decomposition
 
 ![](images/sn1.png)
 
-## Non_Negative Matrix Factorization
+We will need to use ~15 principle components (orthogonal linear combinations of the data) to explain 90% of the variance in the data.
+
+Principle component 1 explains ~30% of the variance in the data. However, the loadings on the questions are not helpful. They are all negative (what??) and also close together. There are not clear groupings of questions which explain this principle component.
+
+Loadings: [-0.17,-0.17,-0.18, -0.18,-0.19,-0.19,-0.19,-0.19,-0.19,-0.19, -0.19,-0.19, -0.19,-0.19,-0.19,-0.19,-0.19,-0.2,-0.2,-0.2,-0.2,-0.2,-0.2,-0.2,-0.2,-0.21,-0.21]
+
+### Non_Negative Matrix Factorization
+
+Topic 1 loads strongly on the following questions:
+
+* 30. I have fun and enjoy my time at the Boys and Girls Club (3.22)
+* 28. I’m glad I’m a Boys and Girls Club member (3.01)
+* 5. At the Club, I have a good time (2.63)
+
+Topic 1 may be labeled **"Fun."**
+
+Topic 2 loads strongly on the following questions:
+
+* 26. The Club helps me to learn about Lakota language and culture (3.02)
+* 23. I feel the Club celebrates who I am as a person (2.91)
+* 27. The Club helps me learn about myself, my family, and my tribe (2.56)
+* 8. I believe all staff members care about me and my experience at the Club (2.20)
+
+This latent topic may be labeled **"Identity Validation."**
+
+Topic 3 loads strongly on the following questions:
+
+* 2. I feel respected by fellow Club members when I am at the Club (2.34)
+* 15. I feel like going to the Club helps me develop my social skills with other students (2.15)
+* 24. The Club helps me to feel proud about who I am (1.36)
+* 9. There are clear expectations for me during Club time (1.32)
+
+This latent topic may be labeled **"Social Skills Development.""**
 
 ![](images/recon_error.png)
+
+The loadings on the questions are much more interpretable in NMF. The positive loadings allow the questions to be grouped into latent topics. However, it is not clear how many latent topics should be used to predict planned retention. There is no clear drop in the Reconstruction Error elbow plot (above).
+
+### Dimensionality Reduction via Random Forest Classifier Feature Importances
+
+I fit a Random Forest Classifier on all 29 questions using balanced classes (planning to return vs. not planning to return). The feature importances are plotted below:
+
+![](images/feature_import_f.png)
+
+The most important questions for predicting planned retention are as follows (in order of feature importance):
+* 17. I feel comfortable and confident in expressing myself at the Club
+* **5. At the Club, I have a good time -- (Fun)**
+* 11. 11. I feel like going to the Club helps me learn more and become smarter
+* 21. The Club helps me to set personal goals
+* **27. The Club helps me learn about myself, my family, and my tribe -- (Identity Validation)**
+* **30. I have fun and enjoy my time at the Boys and Girls Club -- (Fun)**
+* 13. The Club helps me get better at reading
+* 22. The Club helps me to reach my personal goals
+* 10. Staff members recognize me when I do a task well or display good behavior
+* **2. I feel respected by fellow Club members when I am at the Club -- (Social Skill Development)**
+
+## Model Selection
+
+I performed KFold cross validation to pick the set of features that would most accurately predict planned retention. I used random forest classification models with 100 trees and balanced classes.
+
+| Random Forest Classifier Features               | KFold Cross Validation Score (Average Accuracy) |
+|-------------------------------------------------|----------------------------|
+| All Questions + Gender + Club + Age             | .783                       |
+| Principle Components (15) + Gender + Club + Age | .739                       |
+| Top 10 Questions + Gender + Club + Age          | .812                       |
+
+The best performing model used the top 10 most important questions and demographic information to predict planned retention with 81.2% accuracy.
+
+## Future Direction
+
+With more time I would like to:
+* Use grid searching to optimize random forest hyper-parameters for better model selection (vs. using the same hyper-parameters for all models).
+* Try different classifiers besides random forests (Logistic Regression, Gradient Boosting, etc.)
