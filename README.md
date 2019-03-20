@@ -119,7 +119,7 @@ The median was imputed because the data in the questions with na's were skewed (
 
 ### Principal Components Analysis (PCA) via Singular Value Decomposition
 
-![](images/sn1.png)
+![](images/sn1_f.png)
 
 We will need to use ~15 principle components (orthogonal linear combinations of the data) to explain 90% of the variance in the data.
 
@@ -155,7 +155,7 @@ Topic 3 loads strongly on the following questions:
 
 This latent topic may be labeled **"Social Skills Development.""**
 
-![](images/recon_error.png)
+![](images/recon_error_f.png)
 
 The loadings on the questions are much more interpretable in NMF. The positive loadings allow the questions to be grouped into latent topics. However, it is not clear how many latent topics should be used to predict planned retention. There is no clear drop in the Reconstruction Error elbow plot (above).
 
@@ -189,8 +189,35 @@ I performed KFold cross validation to pick the set of features that would most a
 
 The best performing model used the top 10 most important questions and demographic information to predict planned retention with 81.2% accuracy.
 
+## Model Performance
+
+The 10 most important questions and demographics could predict planned retention with 79.2% accuracy on unseen test data.
+
+![](images/roc_f.png)
+
+## Survey Recommendations
+
+The survey can be cut to only include the following 10 Likert Scale Items without losing predictive power:
+
+1. I feel respected by fellow Club members when I am at the Club
+2. At the Club, I have a good time
+3. Staff members recognize me when I do a task well or display good behavior
+4. I feel like going to the Club helps me learn more and become smarter
+5. The Club helps me get better at reading
+6. I feel comfortable and confident in expressing myself at the Club
+7. The Club helps me to set personal goals
+8. The Club helps me to reach my personal goals
+9. The Club helps me learn about myself, my family, and my tribe
+10. I have fun and enjoy my time at the Boys and Girls Club
+
+Consider including a few open response questions (these responses can be analyzed via natural language processing!).
+
+Interesting finding: a few groupings of questions emerged during topic modeling. They may be described as latent topics relating to **fun, identity validation,** and **social skill development.**
+
 ## Future Direction
 
 With more time I would like to:
 * Use grid searching to optimize random forest hyper-parameters for better model selection (vs. using the same hyper-parameters for all models).
-* Try different classifiers besides random forests (Logistic Regression, Gradient Boosting, etc.)
+* Try different classifiers besides random forests (logistic regression, gradient boosting, etc.)
+* Use Latent Dirichlet Allocation (LDA) to find latent topics.
+* Collect up-to-date retention information to find out if the model is predictive of actual retention (not just planned retention).

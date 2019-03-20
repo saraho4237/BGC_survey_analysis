@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split,KFold
 from numpy.linalg import svd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from scikitplot.metrics import plot_roc
+from sklearn.preprocessing import Imputer
 
 def plot_bar(df,column_lst):
     """
@@ -52,6 +54,7 @@ def plot_hists(df, column_lst):
         plt.yticks([])
         name="images/"+col+".png"
         plt.savefig(name)
+        plt.close()
 
 def impute_med(df, column_lst):
     """
@@ -189,6 +192,7 @@ def fit_nmf(features,num_topics):
 
 def plt_recon_error(features,num_topics):
     error = [fit_nmf(features,i) for i in range(1,num_topics+1)]
+    plt.subplot(1,1,1)
     plt.plot(range(1,num_topics+1), error)
     plt.xlabel('Number of Topics (k)')
     plt.ylabel('Reconstruction Error')
@@ -207,8 +211,6 @@ def train_mod_kfold_accuracy(mod,Xs,y):
         accuracies1.append(accuracy_score(y_true, y_predict))
 
     return ("accuracy mod1:", np.average(accuracies1))
-
-
 
 if __name__=="__main__":
     #Read and clean data
@@ -232,6 +234,7 @@ if __name__=="__main__":
     demo_to_plot=['Gender','Race/Ethnicity','Group','Age',"Grade in fall '18"]
     plot_bar(X_train,demo_to_plot)
     plt.savefig("images/demo_bar.png")
+    plt.close()
     #PCA for Dimensionality Reduction
     col_to_scale=['3 (out of 4)', '4 (out of 4)','SCHOOL16']
     same_scale(surv_quest_df,col_to_scale)
@@ -240,11 +243,13 @@ if __name__=="__main__":
     pca.fit_transform(surv_quest_df)
     scree_plot_ev(pca)
     plt.savefig("images/sn1.png")
+    plt.close()
     U,sigma,VT=get_matrix_svd(surv_quest_df,5)
     #NMF for Dimensionality Reduction/Topic Modeling
     W,H=get_matrix_nmf(surv_quest_df,5)
     plt_recon_error(surv_quest_df,25)
     plt.savefig("images/recon_error.png")
+    plt.close()
     #Random Forest for Dimensionality Reduction
     rf_feature_select=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     rf_feature_select.fit(surv_quest_df, y_train)
@@ -257,15 +262,17 @@ if __name__=="__main__":
     plt.xlabel("Questions",fontsize=15)
     plt.ylabel("Feature Importance",fontsize=15)
     plt.savefig("images/feature_import.png")
+    plt.close()
     pred=rf_feature_select.predict(surv_quest_df)
     acc=accuracy_score(y_train, pred)
 
-    corr = df.corr()
-    plt.figure(figsize=(10,10))
-    sns.heatmap(corr,
-            xticklabels=corr.columns.values,
-            yticklabels=corr.columns.values)
-    plt.savefig("images/heat.png")
+    # corr = df.corr()
+    # plt.figure(figsize=(10,10))
+    # sns.heatmap(corr,
+    #         xticklabels=corr.columns.values,
+    #         yticklabels=corr.columns.values)
+    # plt.savefig("images/heat.png")
+    # plt.close()
 
     surv_quest_df["y"]=y_train
     for col in surv_quest_df.columns:
@@ -281,6 +288,8 @@ if __name__=="__main__":
         plt.yticks([])
         name="images/"+col+"compare.png"
         plt.savefig(name)
+        plt.close()
+
     #All Questions and demographics
     rf_model1=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced')
     all_quest_demo=X_train.drop(['ID', 'Group', 'Age', "Grade in fall '18", 'Gender', 'Race/Ethnicity'],axis=1)
@@ -295,6 +304,23 @@ if __name__=="__main__":
     #10 Most Important Questions
     rf_model3=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced')
     import_quest_lst=[question for question in fi["question"][:10]]
-    import_quest_df=surv_quest_df[import_quest_lst].reset_index().drop(["index"],axis=1)
-    import_quest_demos=pd.concat([import_quest_df, demos], axis=1, join_axes=[X_pca.index])
+    import_quest_df=surv_quest_df[import_quest_lst]
+    demos_no_index_reset=X_train[['gender_num','club_num', 'age_bin']]
+    import_quest_demos=pd.concat([import_quest_df, demos_no_index_reset], axis=1,join_axes=[demos_no_index_reset.index])
     acc3=train_mod_kfold_accuracy(rf_model3,import_quest_demos.values,y_train.values)
+    #Prepare test features
+    test_demos=X_test[['gender_num', 'club_num', 'age_bin']]
+    test_questions_df=X_test[import_quest_lst]
+    import_quest_demos_test=pd.concat([test_questions_df, test_demos], axis=1, join_axes=[test_questions_df.index])
+    impute_median=Imputer(strategy='median')
+    import_quest_demos_test=impute_median.fit_transform(import_quest_demos_test)
+    #Train best model, test best model
+    rf_final=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced')
+    rf_final.fit(import_quest_demos, y_train)
+    y_predict = rf_final.predict(import_quest_demos_test)
+    y_predict_prob=rf_final.predict_proba(import_quest_demos_test)
+    acc_final=accuracy_score(y_test, y_predict)
+    #ROC plots
+    plot_roc(y_test, y_predict_prob,title='Test Data ROC Curve', plot_micro=False, plot_macro=True, classes_to_plot=[])
+    plt.savefig("images/roc.png")
+    plt.close()
