@@ -166,16 +166,16 @@ I fit a Random Forest Classifier on all 29 questions using balanced classes (pla
 ![](images/feature_import_f.png)
 
 The most important questions for predicting planned retention are as follows (in order of feature importance):
-* 17. I feel comfortable and confident in expressing myself at the Club
-* **5. At the Club, I have a good time -- (Fun)**
-* 11. 11. I feel like going to the Club helps me learn more and become smarter
-* 21. The Club helps me to set personal goals
-* **27. The Club helps me learn about myself, my family, and my tribe -- (Identity Validation)**
+* 17.I feel comfortable and confident in expressing myself at the Club
+* **5.At the Club, I have a good time -- (Fun)**
+* 11.I feel like going to the Club helps me learn more and become smarter
+* 21.The Club helps me to set personal goals
+* **27.The Club helps me learn about myself, my family, and my tribe -- (Identity Validation)**
 * **30. I have fun and enjoy my time at the Boys and Girls Club -- (Fun)**
-* 13. The Club helps me get better at reading
-* 22. The Club helps me to reach my personal goals
-* 10. Staff members recognize me when I do a task well or display good behavior
-* **2. I feel respected by fellow Club members when I am at the Club -- (Social Skill Development)**
+* 13.The Club helps me get better at reading
+* 22.The Club helps me to reach my personal goals
+* 10.Staff members recognize me when I do a task well or display good behavior
+* **2.I feel respected by fellow Club members when I am at the Club -- (Social Skill Development)**
 
 ## Model Selection
 
