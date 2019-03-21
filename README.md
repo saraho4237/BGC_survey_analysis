@@ -195,10 +195,9 @@ The 10 most important questions and demographics could predict planned retention
 
 ![](images/roc_f.png)
 
-| Question 5            | Question 11            | Question 17            | Question 21            |
-|-----------------------|------------------------|------------------------|------------------------|
-| ![](images/pdp_5.png) | ![](images/pdp_11.png) | ![](images/pdp_17.png) | ![](images/pdp_21.png) |
-
+| Question 17            | Question 5            | Question 11            | Question 21            | Question 27            |
+|------------------------|-----------------------|------------------------|------------------------|------------------------|
+| ![](images/pdp_17.png) | ![](images/pdp_5.png) | ![](images/pdp_11.png) | ![](images/pdp_21.png) | ![](images/pdp_27.png) |
 ## Survey Recommendations
 
 The survey can be cut to only include the following 10 Likert Scale Items without losing predictive power:

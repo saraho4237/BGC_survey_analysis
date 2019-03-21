@@ -223,6 +223,11 @@ def part_dep_plot(features):
                                                                   n_jobs=-1, grid_resolution = 50, figsize = (10,15))
         name="images/pdp_"+feature+".png"
         plt.savefig(name)
+        plt.close()
+
+plot_grouped_bar(groups,):
+    pass
+
 
 if __name__=="__main__":
     #Read and clean data
@@ -337,5 +342,5 @@ if __name__=="__main__":
     plt.savefig("images/roc.png")
     plt.close()
     #Partial Dependance Plots
-    features_to_plot=['gender_num', 'club_num', 'age_bin','17','5','11','21','27','30','13','22','10','2']
-    part_dep_plot(features_to_plot)
+    #part_dep_plot(import_quest_lst)
+    #Demographics by Target
