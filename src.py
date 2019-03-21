@@ -9,6 +9,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from scikitplot.metrics import plot_roc
 from sklearn.preprocessing import Imputer
+from skater.core.explanations import Interpretation
+from skater.model import InMemoryModel
 
 def plot_bar(df,column_lst):
     """
@@ -212,6 +214,16 @@ def train_mod_kfold_accuracy(mod,Xs,y):
 
     return ("accuracy mod1:", np.average(accuracies1))
 
+def part_dep_plot(features):
+    for feature in features:
+        interpreter = Interpretation()
+        interpreter.load_data(import_quest_demos, feature_names=[feature])
+        model = InMemoryModel(rf_final.predict_proba, examples = import_quest_demos)
+        pdplots =  interpreter.partial_dependence.plot_partial_dependence([feature], model, n_samples=100,
+                                                                  n_jobs=-1, grid_resolution = 50, figsize = (10,15))
+        name="images/pdp_"+feature+".png"
+        plt.savefig(name)
+
 if __name__=="__main__":
     #Read and clean data
     df= pd.read_csv("../../cap_data/BGC_data.csv")
@@ -274,35 +286,35 @@ if __name__=="__main__":
     # plt.savefig("images/heat.png")
     # plt.close()
 
-    surv_quest_df["y"]=y_train
-    for col in surv_quest_df.columns:
-        mask=surv_quest_df["y"]==1
-        df1=surv_quest_df[mask]
-        df2=surv_quest_df[~mask]
-        plt.figure(figsize=(10,10))
-        plt.subplot(1,1,1)
-        sns.distplot(df1[col],color='b')
-        plt.subplot(1,1,1)
-        sns.distplot(df2[col],color='g')
-        plt.xticks([])
-        plt.yticks([])
-        name="images/"+col+"compare.png"
-        plt.savefig(name)
-        plt.close()
+    # surv_quest_df["y"]=y_train
+    # for col in surv_quest_df.columns:
+    #     mask=surv_quest_df["y"]==1
+    #     df1=surv_quest_df[mask]
+    #     df2=surv_quest_df[~mask]
+    #     plt.figure(figsize=(10,10))
+    #     plt.subplot(1,1,1)
+    #     sns.distplot(df1[col],color='b')
+    #     plt.subplot(1,1,1)
+    #     sns.distplot(df2[col],color='g')
+    #     plt.xticks([])
+    #     plt.yticks([])
+    #     name="images/"+col+"compare.png"
+    #     plt.savefig(name)
+    #     plt.close()
 
     #All Questions and demographics
-    rf_model1=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced')
+    rf_model1=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     all_quest_demo=X_train.drop(['ID', 'Group', 'Age', "Grade in fall '18", 'Gender', 'Race/Ethnicity'],axis=1)
     acc1=train_mod_kfold_accuracy(rf_model1, all_quest_demo.values,y_train.values)
     #15 Principle Components and Demographics
-    rf_model2=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced')
+    rf_model2=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     pca15 = decomposition.PCA(n_components=15)
     X_pca = pd.DataFrame(pca15.fit_transform(surv_quest_df))
     demos=X_train[['gender_num','club_num', 'age_bin']].reset_index().drop(['index'],axis=1)
     pca_demo=pd.concat([X_pca, demos], axis=1, join_axes=[X_pca.index])
     acc2=train_mod_kfold_accuracy(rf_model2, pca_demo.values,y_train.values)
     #10 Most Important Questions
-    rf_model3=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced')
+    rf_model3=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     import_quest_lst=[question for question in fi["question"][:10]]
     import_quest_df=surv_quest_df[import_quest_lst]
     demos_no_index_reset=X_train[['gender_num','club_num', 'age_bin']]
@@ -315,12 +327,15 @@ if __name__=="__main__":
     impute_median=Imputer(strategy='median')
     import_quest_demos_test=impute_median.fit_transform(import_quest_demos_test)
     #Train best model, test best model
-    rf_final=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced')
+    rf_final=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     rf_final.fit(import_quest_demos, y_train)
     y_predict = rf_final.predict(import_quest_demos_test)
     y_predict_prob=rf_final.predict_proba(import_quest_demos_test)
     acc_final=accuracy_score(y_test, y_predict)
-    #ROC plots
+    #ROC plot
     plot_roc(y_test, y_predict_prob,title='Test Data ROC Curve', plot_micro=False, plot_macro=True, classes_to_plot=[])
     plt.savefig("images/roc.png")
     plt.close()
+    #Partial Dependance Plots
+    features_to_plot=['gender_num', 'club_num', 'age_bin','17','5','11','21','27','30','13','22','10','2']
+    part_dep_plot(features_to_plot)

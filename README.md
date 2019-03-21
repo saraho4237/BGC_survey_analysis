@@ -16,9 +16,9 @@ In summer 2018, the Boys and Girls Club delivered a survey (via in person interv
 
 ## Project Goals
 
-1) Determine which features (survey questions) are most predictive of whether a student plans to continue membership at the Boys and Girls Club. Use this information to shorten the survey in the future.
+1) Determine which features (survey questions) are most useful in predicting whether a student plans to continue membership at the Boys and Girls Club. Use this information to shorten the survey in the future.
 
-2) Reduce the dimensionality of the data to get a model that best predicts whether or not a student plans to continue coming to the Boys and Girls Club.
+2) Reduce the dimensionality of the data to get a model that accurately predicts whether or not a student plans to continue coming to the Boys and Girls Club.
 
 ## Data and EDA
 
@@ -83,7 +83,7 @@ Most club members identify as American Indian.
 
 #### Demographics by target variable (planned retention)
 
-
+**NEED TO DO**
 
 ### Missing Data
 
@@ -195,6 +195,10 @@ The 10 most important questions and demographics could predict planned retention
 
 ![](images/roc_f.png)
 
+| Question 5            | Question 11            | Question 17            | Question 21            |
+|-----------------------|------------------------|------------------------|------------------------|
+| ![](images/pdp_5.png) | ![](images/pdp_11.png) | ![](images/pdp_17.png) | ![](images/pdp_21.png) |
+
 ## Survey Recommendations
 
 The survey can be cut to only include the following 10 Likert Scale Items without losing predictive power:
@@ -216,8 +220,8 @@ Interesting finding: a few groupings of questions emerged during topic modeling.
 
 ## Future Direction
 
-With more time I would like to:
-* Use grid searching to optimize random forest hyper-parameters for better model selection (vs. using the same hyper-parameters for all models).
-* Try different classifiers besides random forests (logistic regression, gradient boosting, etc.)
-* Use Latent Dirichlet Allocation (LDA) to find latent topics.
-* Collect up-to-date retention information to find out if the model is predictive of actual retention (not just planned retention).
+In the future I would like to improve this model/expand upon this project by:
+* Using grid searching to optimize random forest hyper-parameters for better model selection (vs. using the same hyper-parameters for all models).
+* Trying different classifiers besides random forests (logistic regression, gradient boosting, etc.)
+* Using Latent Dirichlet Allocation (LDA) to improve latent topics.
+* Collecting up-to-date retention information to find out if the model is predictive of actual retention (not just planned retention).
