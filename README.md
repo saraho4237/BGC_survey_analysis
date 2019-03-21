@@ -1,3 +1,16 @@
+# Boys and Girls Club of Rosebud Survey Analysis via Dimensionality Reduction
+
+##### Table of Contents
+
+1. [Introduction](#introduction)
+2. [Project Goals](#project-goals)
+3. [Data and EDA](#data-and-eda)
+4. [Dimensionality Reduction](#dimensionality-reduction)
+5. [Model Selection](#model-selection)
+6. [Model Results](#model-results)
+7. [Survey Recommendations](#survey-recommendations)
+8. [Future Direction](#future-direction)
+
 ## Introduction
 
 *"At the Boys and Girls Club of Rosebud, we believe our youth are sacred.  That is why, in everything we do, we seek to empower our youth to live out their dreams.  We do this through consistent mentoring relationships, and a focus on our three priority outcomes: **academic success, good character, and healthy lifestyles**."*
