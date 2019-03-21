@@ -81,10 +81,6 @@ Most club members attend the Mission club. Mission, SD has a relatively large po
 
 Most club members identify as American Indian.
 
-#### Demographics by target variable (planned retention)
-
-**NEED TO DO**
-
 ### Missing Data
 
 The following table shows the questions where one or more data points were missing as well as the number of missing data points:
@@ -189,15 +185,27 @@ I performed KFold cross validation to pick the set of features that would most a
 
 The best performing model used the top 10 most important questions and demographic information to predict planned retention with 81.2% accuracy.
 
-## Model Performance
+## Model Results
+#### Performance
 
 The 10 most important questions and demographics could predict planned retention with 79.2% accuracy on unseen test data.
 
 ![](images/roc_f.png)
 
+#### Take-Aways
+
 | Question 17            | Question 5            | Question 11            | Question 21            | Question 27            |
 |------------------------|-----------------------|------------------------|------------------------|------------------------|
 | ![](images/pdp_17.png) | ![](images/pdp_5.png) | ![](images/pdp_11.png) | ![](images/pdp_21.png) | ![](images/pdp_27.png) |
+
+The partial dependency plots show that for the most important questions (I chose the top 5 to show, above), as responses become more positive, the probability of not planning to come back to the club (probability of attrition) goes down. That is what we would expect. Hurray!
+
+| Gender (Female=1, Male=0)      | Club (1=Mission, 0=Rosebud or Parmalee) | Age (1 = 11+ yo, 0=8-10 yo) |
+|--------------------------------|-----------------------------------------|-----------------------------|
+| ![](images/pdp_gender_num.png) | ![](images/pdp_club_num.png)            | ![](images/pdp_age_bin.png) |
+
+
+
 ## Survey Recommendations
 
 The survey can be cut to only include the following 10 Likert Scale Items without losing predictive power:

@@ -12,7 +12,7 @@ from sklearn.preprocessing import Imputer
 from skater.core.explanations import Interpretation
 from skater.model import InMemoryModel
 
-def plot_bar(df,column_lst):
+def plot_bar(df,column_lst,y):
     """
     Plot bar charts of desired columns
 
@@ -20,6 +20,7 @@ def plot_bar(df,column_lst):
     ----------
     df: pandas.DataFrame
     column_lst: list of strings (column names to plot)
+    y: value
 
     Returns
     -------
@@ -220,28 +221,30 @@ def part_dep_plot(features):
         interpreter.load_data(import_quest_demos, feature_names=[feature])
         model = InMemoryModel(rf_final.predict_proba, examples = import_quest_demos)
         pdplots =  interpreter.partial_dependence.plot_partial_dependence([feature], model, n_samples=100,
-                                                                  n_jobs=-1, grid_resolution = 50, figsize = (10,15))
+                                                                  n_jobs=-1, grid_resolution = 50, figsize = (15,15))
         name="images/pdp_"+feature+".png"
+        plt.title("Partial Dependency Plot of Question "+feature, fontsize=20)
+        plt.ylabel("Average Predicted Probability of Attrition by Question Value (*0.1)",fontsize=15)
+        plt.xlabel("Question "+feature+" Response Value",fontsize=15)
         plt.savefig(name)
         plt.close()
 
-plot_grouped_bar(groups,):
-    pass
-
-
 if __name__=="__main__":
     #Read and clean data
+
     df= pd.read_csv("../../cap_data/BGC_data.csv")
     df["Race/Ethnicity"].fillna("AI",inplace=True)
     df["gender_num"]=[1 if gend=="F" else 0 for gend in df["Gender"]]
     df["club_num"]=[1 if club!="Mission" else 0 for club in df["Group"]]
     df["age_bin"]=[1 if year>10 else 0 for year in df["Age"]]
+    impute_med(df,["2","3 (out of 4)","7","22","23","25","26"])
     X=df.drop(['29'],axis=1)
     y=pd.Series([0 if reten>=4 else 1 for reten in df['29']])
-    X_train, X_test, y_train, y_test=train_test_split(X,y,stratify=y)
-    impute_med(X_train,["2","3 (out of 4)","7","22","23","25","26"])
+    X_train, X_test, y_train, y_test=train_test_split(X,y,stratify=y,random_state=1)
     surv_quest_df=X_train.drop(['ID', 'Group', 'Age', "Grade in fall '18", 'Gender', 'Race/Ethnicity','gender_num', 'club_num', 'age_bin'],axis=1)
+
     #Plots for EDA
+
     quest_to_plot_1=['1', '2', '3 (out of 4)', '4 (out of 4)', '5', '6', '7', '8', '9', '10',
         '11', '12', '13', '14', '15', 'SCHOOL16', '17', '18', '19', '20', '21',
         '22', '23', '24', '25', '26', '27','28','30']
@@ -249,10 +252,12 @@ if __name__=="__main__":
     plot_hists(surv_quest_df,quest_to_plot_1)
     plot_hists(df,quest_to_plot_2)
     demo_to_plot=['Gender','Race/Ethnicity','Group','Age',"Grade in fall '18"]
-    plot_bar(X_train,demo_to_plot)
+    plot_bar(X,demo_to_plot,demo_to_plot)
     plt.savefig("images/demo_bar.png")
     plt.close()
+
     #PCA for Dimensionality Reduction
+
     col_to_scale=['3 (out of 4)', '4 (out of 4)','SCHOOL16']
     same_scale(surv_quest_df,col_to_scale)
     same_scale(X_test,col_to_scale) #for later on
@@ -262,12 +267,16 @@ if __name__=="__main__":
     plt.savefig("images/sn1.png")
     plt.close()
     U,sigma,VT=get_matrix_svd(surv_quest_df,5)
+
     #NMF for Dimensionality Reduction/Topic Modeling
+
     W,H=get_matrix_nmf(surv_quest_df,5)
     plt_recon_error(surv_quest_df,25)
     plt.savefig("images/recon_error.png")
     plt.close()
+
     #Random Forest for Dimensionality Reduction
+
     rf_feature_select=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     rf_feature_select.fit(surv_quest_df, y_train)
     fi=pd.DataFrame()
@@ -283,64 +292,50 @@ if __name__=="__main__":
     pred=rf_feature_select.predict(surv_quest_df)
     acc=accuracy_score(y_train, pred)
 
-    # corr = df.corr()
-    # plt.figure(figsize=(10,10))
-    # sns.heatmap(corr,
-    #         xticklabels=corr.columns.values,
-    #         yticklabels=corr.columns.values)
-    # plt.savefig("images/heat.png")
-    # plt.close()
-
-    # surv_quest_df["y"]=y_train
-    # for col in surv_quest_df.columns:
-    #     mask=surv_quest_df["y"]==1
-    #     df1=surv_quest_df[mask]
-    #     df2=surv_quest_df[~mask]
-    #     plt.figure(figsize=(10,10))
-    #     plt.subplot(1,1,1)
-    #     sns.distplot(df1[col],color='b')
-    #     plt.subplot(1,1,1)
-    #     sns.distplot(df2[col],color='g')
-    #     plt.xticks([])
-    #     plt.yticks([])
-    #     name="images/"+col+"compare.png"
-    #     plt.savefig(name)
-    #     plt.close()
-
     #All Questions and demographics
+
     rf_model1=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     all_quest_demo=X_train.drop(['ID', 'Group', 'Age', "Grade in fall '18", 'Gender', 'Race/Ethnicity'],axis=1)
     acc1=train_mod_kfold_accuracy(rf_model1, all_quest_demo.values,y_train.values)
+
     #15 Principle Components and Demographics
+
     rf_model2=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     pca15 = decomposition.PCA(n_components=15)
     X_pca = pd.DataFrame(pca15.fit_transform(surv_quest_df))
     demos=X_train[['gender_num','club_num', 'age_bin']].reset_index().drop(['index'],axis=1)
     pca_demo=pd.concat([X_pca, demos], axis=1, join_axes=[X_pca.index])
     acc2=train_mod_kfold_accuracy(rf_model2, pca_demo.values,y_train.values)
+
     #10 Most Important Questions
+
     rf_model3=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     import_quest_lst=[question for question in fi["question"][:10]]
     import_quest_df=surv_quest_df[import_quest_lst]
     demos_no_index_reset=X_train[['gender_num','club_num', 'age_bin']]
     import_quest_demos=pd.concat([import_quest_df, demos_no_index_reset], axis=1,join_axes=[demos_no_index_reset.index])
     acc3=train_mod_kfold_accuracy(rf_model3,import_quest_demos.values,y_train.values)
+
     #Prepare test features
+
     test_demos=X_test[['gender_num', 'club_num', 'age_bin']]
     test_questions_df=X_test[import_quest_lst]
     import_quest_demos_test=pd.concat([test_questions_df, test_demos], axis=1, join_axes=[test_questions_df.index])
-    impute_median=Imputer(strategy='median')
-    import_quest_demos_test=impute_median.fit_transform(import_quest_demos_test)
+
     #Train best model, test best model
+
     rf_final=RandomForestClassifier(n_estimators=100,  n_jobs=-1, class_weight='balanced',random_state=1)
     rf_final.fit(import_quest_demos, y_train)
     y_predict = rf_final.predict(import_quest_demos_test)
     y_predict_prob=rf_final.predict_proba(import_quest_demos_test)
     acc_final=accuracy_score(y_test, y_predict)
+
     #ROC plot
+
     plot_roc(y_test, y_predict_prob,title='Test Data ROC Curve', plot_micro=False, plot_macro=True, classes_to_plot=[])
     plt.savefig("images/roc.png")
     plt.close()
-    #Partial Dependance Plots
-    #part_dep_plot(import_quest_lst)
-    #Demographics by Target
+
+    #Partial Dependency Plots
+    part_dep_plot(import_quest_lst)
+    part_dep_plot(['gender_num','club_num', 'age_bin'])
