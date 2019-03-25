@@ -27,6 +27,8 @@ In summer 2018, the Boys and Girls Club delivered a survey (via in person interv
 
 ![](images/bike.png)
 
+*pictures and content from https://www.rosebudbgc.org/*
+
 ## Project Goals
 
 1) Determine which features (survey questions) are most useful in predicting whether a student plans to continue membership at the Boys and Girls Club. Use this information to shorten the survey in the future.
@@ -216,3 +218,5 @@ In the future I would like to improve this model/expand upon this project by:
 * Trying different classifiers besides random forests (logistic regression, gradient boosting, etc.)
 * Using Latent Dirichlet Allocation (LDA) to improve latent topics.
 * Collecting up-to-date retention information to find out if the model is predictive of actual retention (not just planned retention).
+
+## If you would like to contribute to the great programming at the Boys and Girls Club of Rosebud, donate [here](https://www.paypal.com/donate/?token=8QK1jdyb7m8yYDeDVMJfzwD6loKnVRq7aChJ9Skfk3U__1SYmPjAK2mgdDo6qgvNgLtqG0&country.x=US&locale.x=).
